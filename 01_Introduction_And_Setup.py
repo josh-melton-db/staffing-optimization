@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Staffing Optimization for Logistics Operations
 # MAGIC
-# MAGIC This solution demonstrates how to optimize staffing and labor allocation across distribution centers for a logistics company (similar to FedEx, UPS, or DHL).
+# MAGIC This solution demonstrates how to optimize staffing and labor allocation across distribution centers for a logistics company.
 # MAGIC
 # MAGIC # Introduction
 # MAGIC
