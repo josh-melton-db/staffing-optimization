@@ -19,8 +19,8 @@ else:
 current_user_no_at = re.sub(r'\W+', '_', current_user_no_at)
 
 # Unity Catalog three-level namespace
-catalog = "main"  # Using 'main' catalog - change if you have a different catalog
-schema = f"staffing_optimization_{current_user_no_at}"
+catalog = "josh_melton"  # Using 'main' catalog - change if you have a different catalog
+schema = f"staffing_optimization"
 reset_all = dbutils.widgets.get("reset_all_data") == "true"
 
 # Create or reset schema

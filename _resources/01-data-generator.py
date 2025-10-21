@@ -242,7 +242,7 @@ def generate_arma(arparams, maparams, var, offset, number_of_points, plot):
   return(y)
 
 #Schema for output dataframe
-schema = StructType(  
+ts_schema = StructType(  
                     [
                       StructField("distribution_center", StringType(), True),
                       StructField("date", DateType(), True),
@@ -272,7 +272,7 @@ def time_series_generator_pandas_udf(pdf):
 package_volume_df = ( 
   dc_with_details.
    groupby("distribution_center"). 
-   applyInPandas(time_series_generator_pandas_udf, schema).
+   applyInPandas(time_series_generator_pandas_udf, ts_schema).
    select("distribution_center", "date", "package_volume")
 )
 
