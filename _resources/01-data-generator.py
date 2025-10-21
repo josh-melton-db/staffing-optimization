@@ -1,10 +1,24 @@
-cloud_storage_path = '/Users/josh.melton/staffing_optimization'
-dbName = 'staffing_optimization'
-reset_all_data = False
+# Databricks notebook source
+dbutils.widgets.dropdown('reset_all_data', 'false', ['true', 'false'], 'Reset all data')
+dbutils.widgets.text('catalog', 'main', 'Catalog Name')
+dbutils.widgets.text('schema', 'staffing_optimization', 'Schema Name')
 
-print(cloud_storage_path)
-print(dbName)
-print(reset_all_data)
+# COMMAND ----------
+
+print("Starting ./_resources/01-data-generator")
+
+# COMMAND ----------
+
+catalog = dbutils.widgets.get('catalog')
+schema = dbutils.widgets.get('schema')
+reset_all_data = dbutils.widgets.get('reset_all_data') == 'true'
+
+# COMMAND ----------
+
+print(f"Catalog: {catalog}")
+print(f"Schema: {schema}")
+print(f"Full namespace: {catalog}.{schema}")
+print(f"Reset all data: {reset_all_data}")
 
 # COMMAND ----------
 
@@ -267,84 +281,54 @@ display(package_volume_df)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Save package volume as a Delta table
+# MAGIC Save package volume as a Delta table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-package_volume_delta_path = os.path.join(cloud_storage_path, 'package_volume_delta')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 package_volume_df.write \
 .mode("overwrite") \
-.format("delta") \
-.save(package_volume_delta_path)
+.saveAsTable(f"{catalog}.{schema}.package_volume")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.package_volume")
-spark.sql(f"CREATE TABLE {dbName}.package_volume USING DELTA LOCATION '{package_volume_delta_path}'")
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.package_volume"))
 
 # COMMAND ----------
 
-display(spark.sql(f"SELECT * FROM {dbName}.package_volume"))
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT COUNT(*) as row_count FROM {dbName}.package_volume"))
+display(spark.sql(f"SELECT COUNT(*) as row_count FROM {catalog}.{schema}.package_volume"))
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Save Worker Types Table
+# MAGIC ## Save Worker Types Table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-worker_types_delta_path = os.path.join(cloud_storage_path, 'worker_types')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 worker_types_table.write \
 .mode("overwrite") \
-.format("delta") \
-.save(worker_types_delta_path)
+.saveAsTable(f"{catalog}.{schema}.worker_types")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.worker_types")
-spark.sql(f"CREATE TABLE {dbName}.worker_types USING DELTA LOCATION '{worker_types_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.worker_types"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.worker_types"))
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Save Distribution Center Details Table
+# MAGIC ## Save Distribution Center Details Table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-dc_details_delta_path = os.path.join(cloud_storage_path, 'dc_details')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 dc_details_table.write \
 .mode("overwrite") \
-.format("delta") \
-.save(dc_details_delta_path)
+.saveAsTable(f"{catalog}.{schema}.dc_details")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.dc_details")
-spark.sql(f"CREATE TABLE {dbName}.dc_details USING DELTA LOCATION '{dc_details_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.dc_details"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.dc_details"))
 
 # COMMAND ----------
 
@@ -399,28 +383,18 @@ display(current_staffing_table)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Save current staffing as Delta table
+# MAGIC Save current staffing as Delta table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-current_staffing_delta_path = os.path.join(cloud_storage_path, 'current_staffing')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 current_staffing_table.write \
 .mode("overwrite") \
-.format("delta") \
-.save(current_staffing_delta_path)
+.saveAsTable(f"{catalog}.{schema}.current_staffing")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.current_staffing")
-spark.sql(f"CREATE TABLE {dbName}.current_staffing USING DELTA LOCATION '{current_staffing_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.current_staffing"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.current_staffing"))
 
 # COMMAND ----------
 
@@ -462,28 +436,18 @@ display(labor_costs_table)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Save labor costs as Delta table
+# MAGIC Save labor costs as Delta table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-labor_costs_delta_path = os.path.join(cloud_storage_path, 'labor_costs')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 labor_costs_table.write \
 .mode("overwrite") \
-.format("delta") \
-.save(labor_costs_delta_path)
+.saveAsTable(f"{catalog}.{schema}.labor_costs")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.labor_costs")
-spark.sql(f"CREATE TABLE {dbName}.labor_costs USING DELTA LOCATION '{labor_costs_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.labor_costs"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.labor_costs"))
 
 # COMMAND ----------
 
@@ -529,28 +493,18 @@ display(labor_productivity_table)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Save labor productivity as Delta table
+# MAGIC Save labor productivity as Delta table (Unity Catalog Managed Table)
 
 # COMMAND ----------
 
-labor_productivity_delta_path = os.path.join(cloud_storage_path, 'labor_productivity')
-
-# COMMAND ----------
-
-# Write the data 
+# Write as managed table in Unity Catalog
 labor_productivity_table.write \
 .mode("overwrite") \
-.format("delta") \
-.save(labor_productivity_delta_path)
+.saveAsTable(f"{catalog}.{schema}.labor_productivity")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.labor_productivity")
-spark.sql(f"CREATE TABLE {dbName}.labor_productivity USING DELTA LOCATION '{labor_productivity_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.labor_productivity"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.labor_productivity"))
 
 # COMMAND ----------
 

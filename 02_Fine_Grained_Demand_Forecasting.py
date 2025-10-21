@@ -27,8 +27,9 @@
 
 # COMMAND ----------
 
-print(cloud_storage_path)
-print(dbName)
+print(f"Catalog: {catalog}")
+print(f"Schema: {schema}")
+print(f"Full namespace: {catalog}.{schema}")
 
 # COMMAND ----------
 
@@ -44,7 +45,7 @@ from pyspark.sql.types import *
 
 # COMMAND ----------
 
-package_volume_df = spark.read.table(f"{dbName}.package_volume")
+package_volume_df = spark.read.table(f"{catalog}.{schema}.package_volume")
 package_volume_df = package_volume_df.cache() # just for this example notebook
 
 # COMMAND ----------
@@ -128,7 +129,7 @@ assert package_volume_df.select('distribution_center').distinct().count() == for
 # COMMAND ----------
 
 # Load labor productivity data
-labor_productivity = spark.read.table(f"{dbName}.labor_productivity")
+labor_productivity = spark.read.table(f"{catalog}.{schema}.labor_productivity")
 
 # COMMAND ----------
 
@@ -166,49 +167,29 @@ display(labor_requirements)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Save forecasts and labor requirements to delta
+# MAGIC ## Save forecasts and labor requirements to Unity Catalog
 
 # COMMAND ----------
 
-volume_forecast_delta_path = os.path.join(cloud_storage_path, 'volume_forecast')
-
-# COMMAND ----------
-
-# Write the forecast data 
+# Write the forecast data as managed table
 forecast_df.write \
 .mode("overwrite") \
-.format("delta") \
-.save(volume_forecast_delta_path)
+.saveAsTable(f"{catalog}.{schema}.volume_forecast")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.volume_forecast")
-spark.sql(f"CREATE TABLE {dbName}.volume_forecast USING DELTA LOCATION '{volume_forecast_delta_path}'")
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.volume_forecast"))
 
 # COMMAND ----------
 
-display(spark.sql(f"SELECT * FROM {dbName}.volume_forecast"))
-
-# COMMAND ----------
-
-labor_requirements_delta_path = os.path.join(cloud_storage_path, 'labor_requirements')
-
-# COMMAND ----------
-
-# Write the labor requirements data 
+# Write the labor requirements data as managed table
 labor_requirements.write \
 .mode("overwrite") \
-.format("delta") \
-.save(labor_requirements_delta_path)
+.saveAsTable(f"{catalog}.{schema}.labor_requirements")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.labor_requirements")
-spark.sql(f"CREATE TABLE {dbName}.labor_requirements USING DELTA LOCATION '{labor_requirements_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.labor_requirements"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.labor_requirements"))
 
 # COMMAND ----------
 

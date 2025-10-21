@@ -207,10 +207,34 @@ The workflow remains a 3-step process:
 7. **Visualization**: Create dashboards for workforce planning
 8. **What-if Analysis**: Add scenario planning capabilities
 
+## Unity Catalog Integration
+
+The solution now uses **Unity Catalog** with a three-tier namespace for enterprise-grade data governance:
+
+### Key Changes:
+- **Before**: Hive Metastore with `database.table` (two-tier)
+- **After**: Unity Catalog with `catalog.schema.table` (three-tier)
+
+### Benefits:
+- **Managed Tables**: No need to manage cloud storage paths
+- **Data Governance**: Fine-grained access control and audit logging
+- **Cross-Cloud**: Works consistently across AWS, Azure, and GCP
+- **Simplified Management**: `.saveAsTable()` replaces `.save()` + `CREATE TABLE` patterns
+
+### Implementation:
+```python
+# Old Pattern (Hive Metastore)
+df.write.mode("overwrite").format("delta").save("/path/to/delta")
+spark.sql(f"CREATE TABLE {dbName}.table_name USING DELTA LOCATION '/path/to/delta'")
+
+# New Pattern (Unity Catalog)
+df.write.mode("overwrite").saveAsTable(f"{catalog}.{schema}.table_name")
+```
+
 ## Database Schema Summary
 
 ```
-staffing_optimization_logistics
+main.staffing_optimization_{user}
 ├── package_volume (dc, date, volume)
 ├── dc_details (dc, region, size, multiplier)
 ├── worker_types (type, wage, productivity, training_cost)
@@ -221,6 +245,9 @@ staffing_optimization_logistics
 ├── labor_requirements (dc, type, required_hours, required_headcount)
 └── staffing_recommendations (dc, type, current, optimal, hires, layoffs, costs)
 ```
+
+**Default Namespace**: `main.staffing_optimization_{username}`  
+(You can change the catalog by modifying the `catalog` variable in `00-setup.py`)
 
 ---
 

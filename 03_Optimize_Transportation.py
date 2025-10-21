@@ -48,8 +48,9 @@
 
 # COMMAND ----------
 
-print(cloud_storage_path)
-print(dbName)
+print(f"Catalog: {catalog}")
+print(f"Schema: {schema}")
+print(f"Full namespace: {catalog}.{schema}")
 
 # COMMAND ----------
 
@@ -72,19 +73,19 @@ from pyspark.sql.types import *
 # COMMAND ----------
 
 # Load labor requirements (from forecasting notebook)
-labor_requirements = spark.read.table(f"{dbName}.labor_requirements")
+labor_requirements = spark.read.table(f"{catalog}.{schema}.labor_requirements")
 display(labor_requirements)
 
 # COMMAND ----------
 
 # Load current staffing levels
-current_staffing = spark.read.table(f"{dbName}.current_staffing")
+current_staffing = spark.read.table(f"{catalog}.{schema}.current_staffing")
 display(current_staffing)
 
 # COMMAND ----------
 
 # Load labor costs
-labor_costs = spark.read.table(f"{dbName}.labor_costs")
+labor_costs = spark.read.table(f"{catalog}.{schema}.labor_costs")
 display(labor_costs)
 
 # COMMAND ----------
@@ -321,28 +322,18 @@ display(dc_costs)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Save optimization results to delta
+# MAGIC ## Save optimization results to Unity Catalog
 
 # COMMAND ----------
 
-staffing_recommendations_delta_path = os.path.join(cloud_storage_path, 'staffing_recommendations')
-
-# COMMAND ----------
-
-# Write the data 
+# Write the data as managed table
 optimal_staffing_df.write \
 .mode("overwrite") \
-.format("delta") \
-.save(staffing_recommendations_delta_path)
+.saveAsTable(f"{catalog}.{schema}.staffing_recommendations")
 
 # COMMAND ----------
 
-spark.sql(f"DROP TABLE IF EXISTS {dbName}.staffing_recommendations")
-spark.sql(f"CREATE TABLE {dbName}.staffing_recommendations USING DELTA LOCATION '{staffing_recommendations_delta_path}'")
-
-# COMMAND ----------
-
-display(spark.sql(f"SELECT * FROM {dbName}.staffing_recommendations"))
+display(spark.sql(f"SELECT * FROM {catalog}.{schema}.staffing_recommendations"))
 
 # COMMAND ----------
 

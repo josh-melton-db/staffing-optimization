@@ -35,8 +35,18 @@ A logistics company operates 12 distribution centers across 5 regions (Northeast
 
 - **Cost Reduction**: Minimize labor costs while maintaining service levels
 - **Improved Planning**: Data-driven workforce planning based on forecasted demand
-- **Scalability**: Solution scales to hundreds of distribution centers
+- **Scalability**: Solution scales to hundreds of distribution centers using distributed processing
 - **Operational Efficiency**: Optimal balance of regular time, overtime, and workforce changes
+- **Enterprise-Ready**: Uses Unity Catalog for secure, governed data management with three-tier namespace
+
+## Technical Highlights
+
+- **Unity Catalog Integration**: All tables are managed in Unity Catalog with `catalog.schema.table` namespace
+- **Managed Tables**: No need to manage cloud storage paths - tables are stored as managed Delta tables
+- **Time Series Forecasting**: Holt-Winters seasonal method for package volume predictions
+- **Linear Programming**: PuLP library for staffing optimization with multiple constraints
+- **Distributed Processing**: Pandas UDFs scale optimization across all distribution centers
+- **Delta Lake**: All data stored in Delta format for ACID transactions and time travel
 
 ___
 
