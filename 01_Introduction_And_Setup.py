@@ -10,6 +10,8 @@
 # MAGIC **Situation**:
 # MAGIC We model a logistics company operating 12 distribution centers across 5 regions (Northeast, Southeast, Midwest, Southwest, and West). Each distribution center handles package sorting, loading, and delivery operations with varying volumes based on their size and region. The company employs 5 different types of workers: Package Handlers, Sorters, Loaders, Drivers, and Supervisors.
 # MAGIC
+# MAGIC The company is experiencing growth, with current staffing levels below optimal capacity (60-75% staffed). The optimization will help determine where to hire, how many workers to add, and how to balance labor costs while meeting increased demand.
+# MAGIC
 # MAGIC
 # MAGIC **The following are given**:
 # MAGIC - Historical package volume time series for each distribution center (2 years of weekly data)

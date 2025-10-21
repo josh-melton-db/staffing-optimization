@@ -337,30 +337,52 @@ display(spark.sql(f"SELECT * FROM {catalog}.{schema}.dc_details"))
 
 # COMMAND ----------
 
-# Cross join DCs with worker types to get all combinations
-current_staffing = distribution_centers_table.crossJoin(worker_types_table.select("worker_type"))
+# Calculate average package volumes per DC to base current staffing on
+avg_volumes = (
+    package_volume_df
+    .groupBy("distribution_center")
+    .agg(f.avg("package_volume").alias("avg_package_volume"))
+)
 
-# Generate current headcount based on average package volumes and worker productivity
-# This creates a realistic baseline staffing scenario
+# Cross join DCs with worker types and add average volumes
+current_staffing = (
+    distribution_centers_table
+    .crossJoin(worker_types_table.select("worker_type", "packages_per_hour"))
+    .join(avg_volumes, ["distribution_center"], "inner")
+)
+
+# Generate current headcount based on average package volumes
+# Current staffing is UNDERSTAFFED (60-75% of need) to create hiring scenario
 np.random.seed(456)
 
 def generate_current_staffing(pdf: pd.DataFrame) -> pd.DataFrame:
-    # Add some variation to staffing levels
-    # Supervisors: 1 per 15-20 workers
-    # Other workers: based on workload with some inefficiency
+    # Calculate staffing based on average volume, but understaffed
+    # This creates a scenario where optimization will recommend HIRING
     pdf_return = pdf.copy()
     
     headcounts = []
     for idx, row in pdf.iterrows():
+        avg_volume = row['avg_package_volume']
+        
         if row['worker_type'] == 'Supervisor':
-            # 1 supervisor per 15-20 other workers (will adjust after)
-            headcount = np.random.randint(2, 6)
+            # Supervisors: Estimate based on total workforce (will be ~2-4 per DC)
+            # Slightly understaffed
+            headcount = max(2, int(avg_volume / 20000))  # 1 supervisor per ~20k packages
         else:
-            # Base staffing on typical volume
-            # Assume 40 hours per week, but only 70-90% utilization
-            utilization = np.random.uniform(0.7, 0.9)
-            base_headcount = np.random.randint(20, 80)
-            headcount = int(base_headcount * utilization)
+            # Calculate needed headcount based on volume and productivity
+            packages_per_hour = row['packages_per_hour']
+            if packages_per_hour > 0:
+                # Hours needed per week: volume / packages_per_hour
+                hours_needed = avg_volume / packages_per_hour
+                # Convert to headcount (40 hrs per week)
+                optimal_headcount = hours_needed / 40.0
+                
+                # Current staffing is 60-75% of optimal (understaffed for growth)
+                staffing_ratio = np.random.uniform(0.60, 0.75)
+                headcount = max(3, int(optimal_headcount * staffing_ratio))
+            else:
+                headcount = 2
+        
         headcounts.append(headcount)
     
     pdf_return['current_headcount'] = headcounts

@@ -12,6 +12,8 @@ This solution accelerator demonstrates how to optimize workforce allocation and 
 **Situation**:
 A logistics company operates 12 distribution centers across 5 regions (Northeast, Southeast, Midwest, Southwest, and West). Each distribution center processes packages for sorting, loading, and delivery with varying volumes based on size, region, and seasonality. The company employs 5 different types of workers: Package Handlers, Sorters, Loaders, Drivers, and Supervisors.
 
+The company is experiencing growth with current staffing at 60-75% of optimal capacity. This creates a hiring and expansion scenario where the optimization determines optimal staffing levels, hiring recommendations, and cost-effective workforce allocation strategies.
+
 **What's given**:
 - Historical package volume time series for each distribution center (2 years of weekly data)
 - Distribution center details including region, size, and capacity multipliers
